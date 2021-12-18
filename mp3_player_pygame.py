@@ -1,9 +1,21 @@
+"""
+    Name: mp3_player_pygame.py
+    Author: William A Loring
+    Created: 12/17/21
+    Purpose: Browse for and play mp3 files
+"""
+# History
+# ------------------------------------------------
+# Author     Date           Comments
+# Loring     12/17/2021       Initial creation
+
+
 from tkinter import *
 from tkinter.ttk import *
-from tkinter import filedialog
-from pygame import mixer
-import os
-import time
+from tkinter import filedialog  # Browsing for files
+from pygame import mixer        # Play songs
+import os                       # Working with file path
+import time                     # Display length of song
 
 
 class PlayMP3:
@@ -11,6 +23,7 @@ class PlayMP3:
         # Initialize the pygame mixer and volume
         mixer.init()
         mixer.music.set_volume(0.70000)
+
         # Define window
         self.root = Tk()
         self.root.title("Play Mp3")
@@ -18,75 +31,84 @@ class PlayMP3:
         self.root.iconbitmap("note.ico")
         self.root.resizable(0, 0)
         self.create_widgets()
+        # Start tkinter main program loop
         mainloop()
 
-    def play(self, *args):
+#------------------------------- PLAY SONG -----------------------------#
+    def play_song(self, *args):
         """ Play song """
-        # Loading the song
-        mixer.music.load(self.filename)
+        # Load the song
+        mixer.music.load(self.file_name)
 
-        sound = mixer.Sound(self.filename)
+        # Create Sound object containing the mp3 file
+        sound = mixer.Sound(self.file_name)
 
+        # Get the length of the song, convert it into time format
         length = time.strftime("%H:%M:%S", time.gmtime(
             mixer.Sound.get_length(sound)))
 
-        # Setting the volume
+        # Set the initial volume
         volume = mixer.music.set_volume(0.70000)
-        print(volume)
 
-        # Start playing the song
         # Play the song asychronously
         mixer.music.play()
         self.lbl_length.configure(text=f"{length}")
-        self.lbl_file_name.configure(text=f" Playing: {self.filename}")
+        self.lbl_file_name.configure(text=f" Playing: {self.mp3_filename}")
 
+#------------------------------- PAUSE SONG -----------------------------#
     def pause(self):
         # Pause sound
         mixer.music.pause()
-        self.lbl_file_name.configure(text=f" Paused: {self.filename}")
+        self.lbl_file_name.configure(text=f" Paused: {self.mp3_filename}")
 
+#------------------------------- RESUME SONG -----------------------------#
     def resume(self):
         # Unpause sound
         mixer.music.unpause()
-        self.lbl_file_name.configure(text=f" Playing: {self.filename}")
+        self.lbl_file_name.configure(text=f" Playing: {self.mp3_filename}")
 
+#------------------------ STOP SONG PLAYBACK -----------------------------#
     def stop(self):
         # Stop sound
         mixer.music.stop()
-        self.lbl_file_name.configure(text=f" Stopped: {self.filename}")
+        self.lbl_file_name.configure(text=f" Stopped: {self.mp3_filename}")
 
+#------------------------------- INCREASE VOLUME -----------------------------#
     def increase_volume(self):
+        # TODO: Increase and decrease volume are too complicated
         volume = mixer.music.get_volume()
         mixer.music.set_volume(volume + .10000)
-        print(volume)
         volume = mixer.music.get_volume()
-        print(volume)
         volume = (round(volume * 10)) * 10
         self.lbl_volume.configure(text=f"Volume: {volume} %")
 
+#------------------------------- DECREASE VOLUME -----------------------------#
     def decrease_volume(self):
+        # TODO: Increase and decrease volume are too complicated
         volume = mixer.music.get_volume()
-        print(volume)
         mixer.music.set_volume(volume - .10000)
         volume = mixer.music.get_volume()
-        print(volume)
         volume = (round(volume * 10)) * 10
         self.lbl_volume.configure(text=f"Volume: {volume} %")
 
+#------------------------------- BROWSE FILES -----------------------------#
     def browse_files(self):
-        self.filename = filedialog.askopenfilename(
+        self.file_name = filedialog.askopenfilename(
             initialdir=os.getcwd(),
             title="Select a File",
             filetypes=(("Mp3 files",
                         "*.mp3*"),
                        ("all files",
                         "*.*")))
-        os.path.split(self.filename)
-        self.filename = os.path.split(self.filename)[1]
 
-        # Change label contents
-        self.lbl_file_name.configure(text=f" File Opened: {self.filename}")
+        # Split the filename from the absolute path
+        self.mp3_filename = os.path.split(self.file_name)[1]
 
+        # Display the name of the mp3 file
+        self.lbl_file_name.configure(
+            text=f" File Opened: {self.mp3_filename}")
+
+#------------------------------- BROWSE FILES -----------------------------#
     def create_widgets(self):
         # Create input and output frames
         self.open_mp3_frame = LabelFrame(
@@ -121,7 +143,7 @@ class PlayMP3:
         self.lbl_file_name = Label(
             self.open_mp3_frame, text=" No file open", relief=GROOVE, anchor=W, width=45)
         btn_play = Button(
-            self.play_frame, text="Play", command=self.play)
+            self.play_frame, text="Play", command=self.play_song)
         btn_pause = Button(
             self.play_frame, text="Pause", command=self.pause)
         btn_resume = Button(
@@ -141,8 +163,8 @@ class PlayMP3:
         btn_pause.grid(row=0, column=1)
         btn_resume.grid(row=0, column=2)
         btn_stop.grid(row=0, column=3)
-        btn_decrease_volume.grid(row=0, column=0)
-        btn_increase_volume.grid(row=0, column=1)
+        btn_increase_volume.grid(row=0, column=0)
+        btn_decrease_volume.grid(row=0, column=1)
         self.lbl_volume.grid(row=0, column=2)
         self.lbl_length.grid(row=0, column=3)
 
@@ -157,8 +179,9 @@ class PlayMP3:
             child.grid_configure(padx=7, pady=7, ipadx=3, ipady=3)
 
         # The enter key will activate the play method
-        self.root.bind('<Return>', self.play)
+        self.root.bind('<Return>', self.play_song)
 
 
+#------------------------- START MAIN PROGRAM -----------------------------#
 # Create object, start main program
 play_mp3 = PlayMP3()
